@@ -1,18 +1,9 @@
-import {
-  GetObjectCommand,
-  GetObjectCommandInput,
-  GetObjectCommandOutput,
-  S3Client,
-} from '@aws-sdk/client-s3';
+import { GetObjectCommand, GetObjectCommandInput, GetObjectCommandOutput, S3Client } from '@aws-sdk/client-s3';
 import { S3RequestPresigner } from '@aws-sdk/s3-request-presigner';
 import { createRequest } from '@aws-sdk/util-create-request';
 import { formatUrl } from '@aws-sdk/util-format-url';
-import { v4 as uuidv4 } from 'uuid';
-import {
-  checkLanguagesPresent,
-  delay,
-  extractPathWithTrailingSlash,
-} from '../../../utils';
+import { randomUUID } from 'crypto';
+import { checkLanguagesPresent, delay, extractPathWithTrailingSlash } from '../../../utils';
 import { getContentTableInstance } from '../../../utils/dal/content';
 
 const db = getContentTableInstance(process.env.TABLE_NAME!);
@@ -71,7 +62,7 @@ const main = async (event: any, _context: any, callback: any) => {
      * If there's no URL, return 404. We need the URL to crawl the page
      */
     if (!url) throw new Error('404');
-    const createResponse = await db.create(uuidv4(), url);
+    const createResponse = await db.create(randomUUID(), url);
     uuid = createResponse.uuid;
     console.log(`Created record for ${url}`);
     existingItem = await db.get(uuid);
@@ -94,24 +85,16 @@ const main = async (event: any, _context: any, callback: any) => {
     const output: { code: string; url: string }[] = [];
     await Promise.all(
       keys.map(async (key) => {
-        const { Bucket, Key } = parseS3Url(
-          existingItem!['outputs'][key]['url']
-        );
+        const { Bucket, Key } = parseS3Url(existingItem!['outputs'][key]['url']);
 
         const command = new GetObjectCommand({
           Bucket,
           Key,
         });
 
-        const request = await createRequest<
-          any,
-          GetObjectCommandInput,
-          GetObjectCommandOutput
-        >(new S3Client({}), command);
+        const request = await createRequest<any, GetObjectCommandInput, GetObjectCommandOutput>(new S3Client({}), command);
 
-        const signedUrl = formatUrl(
-          await presigner.presign(request, { expiresIn: 3600 })
-        );
+        const signedUrl = formatUrl(await presigner.presign(request, { expiresIn: 3600 }));
 
         output.push({ code: key, url: signedUrl });
       })
