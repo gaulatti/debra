@@ -5,6 +5,7 @@ import { buildTranslateModule } from './modules/translate';
 import { buildTtsResources } from './modules/tts';
 import { buildTtsContentWorkflow } from './workflows/ttsContent';
 import { buildAppsyncApi } from './appsync';
+import { buildAristonResources } from './modules/ariston';
 /**
  * Represents the EleniStack class that extends the Stack class.
  * This class is responsible for building the Eleni stack and its resources.
@@ -35,6 +36,8 @@ export class EleniStack extends Stack {
       pollyWaitLambda,
       pollyListenerLambda
     );
+
+    buildAristonResources(this);
 
     const api = buildAppsyncApi(this, getLambda)
   }
