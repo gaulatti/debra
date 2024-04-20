@@ -11,6 +11,9 @@ const buildAristonTriggerLambda = (stack: Stack) => {
     handler: 'main',
     runtime: Runtime.NODEJS_LATEST,
     timeout: Duration.minutes(1),
+    environment: {
+      API_KEY: process.env.API_KEY || ''
+    }
   };
   const triggerLambda = new NodejsFunction(stack, `${triggerLambdaSpec.functionName}Lambda`, triggerLambdaSpec);
 
