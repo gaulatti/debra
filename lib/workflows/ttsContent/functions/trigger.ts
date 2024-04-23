@@ -26,7 +26,7 @@ const buildTriggerLambda = (
       functionName: `${STACK_NAME}ContentToSpeechTrigger`,
       entry: './src/functions/workflows/content-to-speech/trigger.ts',
       handler: 'main',
-      runtime: Runtime.NODEJS_LATEST,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.minutes(1),
       environment: {
         STATE_MACHINE_ARN: stateMachine.stateMachineArn,

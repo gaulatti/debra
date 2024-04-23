@@ -9,7 +9,7 @@ const buildAristonTriggerLambda = (stack: Stack) => {
     functionName: `${STACK_NAME}AristonTrigger`,
     entry: './src/functions/workflows/ariston/trigger.ts',
     handler: 'main',
-    runtime: Runtime.NODEJS_LATEST,
+    runtime: Runtime.NODEJS_20_X,
     timeout: Duration.minutes(1),
     environment: {
       API_KEY: process.env.API_KEY || ''

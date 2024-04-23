@@ -36,7 +36,7 @@ const buildMergeFilesLambda = (
       entry: './src/functions/tts/merge_files.ts',
       handler: 'main',
       layers: [ffmpegLayer],
-      runtime: Runtime.NODEJS_LATEST,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.seconds(15),
       memorySize: 512,
       environment: {

@@ -19,7 +19,7 @@ const buildPollyWaitLambda = (stack: Stack, table: Table) => {
       functionName: `${STACK_NAME}TextToSpeechPollyWait`,
       entry: './src/functions/tts/polly_wait.ts',
       handler: 'main',
-      runtime: Runtime.NODEJS_LATEST,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.minutes(1),
       environment: {
         TABLE_NAME: table.tableName,

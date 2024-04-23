@@ -17,7 +17,7 @@ const buildPrePollyLambda = (stack: Stack) => {
       functionName: `${STACK_NAME}TextToSpeechPrePolly`,
       entry: './src/functions/tts/pre_polly.ts',
       handler: 'main',
-      runtime: Runtime.NODEJS_LATEST,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.minutes(1),
     }
   );

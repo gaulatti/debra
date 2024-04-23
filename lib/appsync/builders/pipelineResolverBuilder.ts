@@ -38,7 +38,7 @@ const createPipelineResolverBuilder = (
           entry,
           environment,
           vpc,
-          runtime: Runtime.NODEJS_18_X,
+          runtime: Runtime.NODEJS_20_X,
           timeout: Duration.seconds(60),
           allowPublicSubnet: true,
           role,

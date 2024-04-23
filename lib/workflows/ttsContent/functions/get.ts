@@ -25,7 +25,7 @@ const buildGetLambda = (
       functionName: `${STACK_NAME}ContentToSpeechGet`,
       entry: './src/functions/workflows/content-to-speech/get.ts',
       handler: 'main',
-      runtime: Runtime.NODEJS_LATEST,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.minutes(2),
       environment: {
         TABLE_NAME: table.tableName,

@@ -17,7 +17,7 @@ const buildPreTranslateLambda = (stack: Stack) => {
       functionName: `${STACK_NAME}TextPreTranslate`,
       entry: './src/functions/translate/pre_translate.ts',
       handler: 'main',
-      runtime: Runtime.NODEJS_LATEST,
+      runtime: Runtime.NODEJS_20_X,
       timeout: Duration.minutes(1),
     }
   );
