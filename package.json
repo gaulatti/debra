@@ -29,6 +29,8 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.572.0",
+    "@figma/plugin-typings": "^1.93.0",
     "aws-cdk-lib": "^2.138.0",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",

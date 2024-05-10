@@ -1,17 +1,33 @@
+import Axios from 'axios';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+const secretsManager = new SecretsManagerClient();
+
+
 const main = async (event: any, _context: any, callback: any) => {
   /**
-   * We won't catch all the events and it's enough to determine
-   * that LIBRARY_PUBLISH is the one we need to trigger the workflow.
+   * Get the Figma file and token from the AWS Secrets Manager.
    */
+  const figmaFile = await secretsManager.send(new GetSecretValueCommand({ SecretId: process.env.FIGMA_FILE }));
+  const figmaToken = await secretsManager.send(new GetSecretValueCommand({ SecretId: process.env.FIGMA_TOKEN }));
+
   const body = JSON.parse(event.body);
   if (body.event_type == 'LIBRARY_PUBLISH') {
-    const fileKey = body.file_key;
-    const triggeredBy = body.triggered_by;
-    const timestamp = body.timestamp;
-    console.log({ fileKey, triggeredBy, timestamp });
+    const { fileKey, triggered_by, timestamp } = body;
 
-    // TODO: store changes
-    // GET/v1/files/:key
+    const { data } = await Axios.get(`https://api.figma.com/v1/files/${figmaFile.SecretString}`, {
+      headers: {
+        'X-FIGMA-TOKEN': figmaToken.SecretString,
+      },
+    });
+
+    const { children } = data.document;
+    console.log({ children });
+    /**
+     * TODO: Should we do this like on the TTS project where this triggers Step Functions?
+     * Because Figma will wait for our response, and this might take a while depending
+     * on the figma file size.
+     */
+    // TODO: store changes in s3
     // TODO: get file contents
     // TODO: Parse the file
     // TODO: Serialize the file

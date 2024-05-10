@@ -1,6 +1,7 @@
 import { Stack } from 'aws-cdk-lib';
 import { buildAristonTriggerLambda } from './functions/trigger';
 import { buildAristonApi } from './network/api';
+import { createFigmaSecrets } from './secrets/figma';
 
 /**
  * Builds the Ariston resources.
@@ -9,7 +10,18 @@ import { buildAristonApi } from './network/api';
  * @returns An object containing the triggerLambda function.
  */
 const buildAristonResources = (stack: Stack) => {
-  const { triggerLambda, lambdaIntegration } = buildAristonTriggerLambda(stack);
+  const { figmaToken, figmaFile } = createFigmaSecrets(stack);
+  const { triggerLambda, lambdaIntegration } = buildAristonTriggerLambda(stack, figmaToken, figmaFile);
+
+  /**
+   * Grant the Lambda function read access to the Figma secrets.
+   */
+  figmaToken.grantRead(triggerLambda);
+  figmaFile.grantRead(triggerLambda);
+
+  /**
+   * Build the API Gateway.
+   */
   const { endpoint } = buildAristonApi(stack);
 
   /**
@@ -17,7 +29,7 @@ const buildAristonResources = (stack: Stack) => {
    */
   const triggerResource = endpoint.root.addResource('trigger');
   triggerResource.addMethod('POST', lambdaIntegration);
-  
+
   return { triggerLambda };
 };
 
