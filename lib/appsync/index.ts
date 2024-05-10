@@ -7,7 +7,6 @@ import {
   GraphqlApi,
 } from 'aws-cdk-lib/aws-appsync';
 import * as path from 'path';
-import { STACK_NAME } from '../consts';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { buildLambdaResolverRole } from './roles/lambdaResolverRole';
 import { createVpc } from './network/vpc';
@@ -21,8 +20,8 @@ import { createPipelineResolverBuilder } from './builders/pipelineResolverBuilde
  * @returns The configured AppSync API.
  */
 const buildAppsyncApi = (stack: Stack, getLambda: NodejsFunction) => {
-  const api = new GraphqlApi(stack, `${STACK_NAME.toLowerCase()}Api`, {
-    name: `${STACK_NAME.toLowerCase()}Api`,
+  const api = new GraphqlApi(stack, `${stack.stackName}Api`, {
+    name: `${stack.stackName}Api`,
     definition: Definition.fromFile(path.join(__dirname, 'eleni.graphql')),
     authorizationConfig: {
       defaultAuthorization: {
@@ -52,7 +51,7 @@ const buildAppsyncApi = (stack: Stack, getLambda: NodejsFunction) => {
     getLambda
   );
 
-  new CfnResolver(stack, `${STACK_NAME}GetAudioContentResolver`, {
+  new CfnResolver(stack, `${stack.stackName}GetAudioContentResolver`, {
     apiId: api.apiId,
     typeName: 'Query',
     fieldName: 'getContentAudio',

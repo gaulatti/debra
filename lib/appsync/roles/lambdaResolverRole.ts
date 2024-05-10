@@ -6,7 +6,6 @@ import {
   Role,
   ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { STACK_NAME } from '../../consts';
 
 /**
  * Builds the Lambda resolver role.
@@ -15,7 +14,7 @@ import { STACK_NAME } from '../../consts';
  * @returns The Lambda resolver role.
  */
 const buildLambdaResolverRole = (stack: Stack) => {
-  const lambdaRole = new Role(stack, `${STACK_NAME}LambdaServiceRole`, {
+  const lambdaRole = new Role(stack, `${stack.stackName}LambdaServiceRole`, {
     assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
     managedPolicies: [
       ManagedPolicy.fromAwsManagedPolicyName(

@@ -6,7 +6,6 @@ import {
   SubnetType,
   Vpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { STACK_NAME } from '../../consts';
 
 /**
  * Creates a VPC with the specified configuration.
@@ -15,18 +14,18 @@ import { STACK_NAME } from '../../consts';
  * @returns The created VPC.
  */
 const createVpc = (stack: Stack) => {
-  const vpc = new Vpc(stack, `${STACK_NAME}Vpc`, {
+  const vpc = new Vpc(stack, `${stack.stackName}Vpc`, {
     ipAddresses: IpAddresses.cidr('10.0.0.0/16'),
     natGateways: 0,
     maxAzs: 2,
     subnetConfiguration: [
       {
-        name: `private-${STACK_NAME.toLowerCase()}`,
+        name: `private-${stack.stackName}`,
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
         cidrMask: 24,
       },
       {
-        name: `public-${STACK_NAME.toLowerCase}`,
+        name: `public-${stack.stackName}`,
         subnetType: SubnetType.PUBLIC,
         cidrMask: 24,
       },
@@ -35,7 +34,7 @@ const createVpc = (stack: Stack) => {
 
   new InterfaceVpcEndpoint(
     stack,
-    `${STACK_NAME}ApoquindoVpcSecretsManagerEndpoint`,
+    `${stack.stackName}ApoquindoVpcSecretsManagerEndpoint`,
     {
       service: InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
       vpc,

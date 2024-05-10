@@ -1,13 +1,12 @@
 import { Duration, Stack } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { STACK_NAME } from '../../../consts';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
 const buildAristonTriggerLambda = (stack: Stack, figmaToken: Secret, figmaFile: Secret) => {
   const triggerLambdaSpec = {
-    functionName: `${STACK_NAME}AristonTrigger`,
+    functionName: `${stack.stackName}AristonTrigger`,
     entry: './src/functions/workflows/ariston/trigger.ts',
     handler: 'main',
     runtime: Runtime.NODEJS_20_X,

@@ -8,7 +8,6 @@ import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { ArnPrincipal, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { STACK_NAME } from '../../consts';
 import { capitalizeFirstLetter } from '../utils/strings';
 /**
  * Creates a pipeline resolver builder.
@@ -32,8 +31,9 @@ const createPipelineResolverBuilder = (
     if (!lambdaFunction && entry) {
       lambdaFunction = new NodejsFunction(
         stack,
-        `${STACK_NAME}${name}PipelineResolverFunction`,
+        `${stack.stackName}${name}PipelineResolverFunction`,
         {
+          functionName: `${stack.stackName}${name}`,
           handler: 'resolver',
           entry,
           environment,
@@ -62,10 +62,10 @@ const createPipelineResolverBuilder = (
 
     const dataSource = new CfnDataSource(
       stack,
-      `${STACK_NAME}${name}DataSource`,
+      `${stack.stackName}${name}DataSource`,
       {
         apiId: api.apiId,
-        name: `${STACK_NAME}${name}DataSource`,
+        name: `${stack.stackName}${name}DataSource`,
         type: 'AWS_LAMBDA',
         lambdaConfig: {
           lambdaFunctionArn: lambdaFunction.functionArn,
@@ -76,11 +76,11 @@ const createPipelineResolverBuilder = (
 
     const configuration = new CfnFunctionConfiguration(
       stack,
-      `${STACK_NAME}${name}FunctionConfiguration`,
+      `${stack.stackName}${name}FunctionConfiguration`,
       {
         apiId: api.apiId,
         dataSourceName: dataSource.name,
-        name: `${STACK_NAME}${name}PipelineFunction`,
+        name: `${stack.stackName}${name}PipelineFunction`,
         functionVersion: '2018-05-29',
         requestMappingTemplate: `
         {
