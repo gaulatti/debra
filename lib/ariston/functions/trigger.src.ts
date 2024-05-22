@@ -1,20 +1,18 @@
+import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import Axios from 'axios';
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 const secretsManager = new SecretsManagerClient();
-
 
 const main = async (event: any, _context: any, callback: any) => {
   /**
    * Get the Figma file and token from the AWS Secrets Manager.
    */
-  const figmaFile = await secretsManager.send(new GetSecretValueCommand({ SecretId: process.env.FIGMA_FILE }));
   const figmaToken = await secretsManager.send(new GetSecretValueCommand({ SecretId: process.env.FIGMA_TOKEN }));
 
   const body = JSON.parse(event.body);
   if (body.event_type == 'LIBRARY_PUBLISH') {
     const { fileKey, triggered_by, timestamp } = body;
 
-    const { data } = await Axios.get(`https://api.figma.com/v1/files/${figmaFile.SecretString}`, {
+    const { data } = await Axios.get(`https://api.figma.com/v1/files/${fileKey}`, {
       headers: {
         'X-FIGMA-TOKEN': figmaToken.SecretString,
       },
@@ -22,6 +20,7 @@ const main = async (event: any, _context: any, callback: any) => {
 
     const { children } = data.document;
     console.log({ children });
+
     /**
      * TODO: Should we do this like on the TTS project where this triggers Step Functions?
      * Because Figma will wait for our response, and this might take a while depending
