@@ -1,5 +1,6 @@
 import { Stack } from 'aws-cdk-lib';
-import { CloudFrontWebDistribution, OriginAccessIdentity } from 'aws-cdk-lib/aws-cloudfront';
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { CloudFrontWebDistribution, OriginAccessIdentity, ViewerCertificate } from 'aws-cdk-lib/aws-cloudfront';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 
 /**
@@ -10,17 +11,26 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
  * @returns The created CloudFront distribution.
  */
 const createDistribution = (stack: Stack, s3BucketSource: Bucket) => {
-   /**
-    * Represents the CloudFront Origin Access Identity (OAI).
-    */
-   const originAccessIdentity = new OriginAccessIdentity(stack, `${stack.stackName}DistributionOAI`);
+  /**
+   * The domain name to be used for the CloudFront distribution.
+   */
+  const certificate = Certificate.fromCertificateArn(
+    stack,
+    `${stack.stackName}Certificate`,
+    'arn:aws:acm:us-east-1:792025092931:certificate/12332379-56cf-4e0a-9ad4-3aba595cc5e8'
+  );
 
-   /**
-    * Grants read permissions to the CloudFront Origin Access Identity (OAI).
-    */
-   s3BucketSource.grantRead(originAccessIdentity);
+  /**
+   * Represents the CloudFront Origin Access Identity (OAI).
+   */
+  const originAccessIdentity = new OriginAccessIdentity(stack, `${stack.stackName}DistributionOAI`);
 
-   /**
+  /**
+   * Grants read permissions to the CloudFront Origin Access Identity (OAI).
+   */
+  s3BucketSource.grantRead(originAccessIdentity);
+
+  /**
    * Represents the CloudFront distribution to serve the React Assets.
    */
   const distribution = new CloudFrontWebDistribution(stack, `${stack.stackName}Distribution`, {
@@ -33,6 +43,9 @@ const createDistribution = (stack: Stack, s3BucketSource: Bucket) => {
         behaviors: [{ isDefaultBehavior: true }],
       },
     ],
+    viewerCertificate: ViewerCertificate.fromAcmCertificate(certificate, {
+      aliases: ['nena.gaulatti.com'],
+    }),
   });
 
   return distribution;
