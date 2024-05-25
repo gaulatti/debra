@@ -4,6 +4,7 @@ import 'source-map-support/register';
 import { AristonStack } from '../lib/ariston';
 import { NenaStack } from '../lib/nena';
 import { PoopoStack } from '../lib/poopo';
+import { AitanaStack } from '../lib/aitana';
 
 /**
  * Represents the AWS Cloud Development Kit (CDK) app.
@@ -24,3 +25,8 @@ new NenaStack(app, 'Nena', { stackName: 'Nena' });
  * Represent the Poopo stack (Lighthouse Beaconing on Lambda)
  */
 new PoopoStack(app, 'Poopo', { stackName: 'Poopo' });
+
+/**
+ * Represent the Aitana stack (Cognito Authentication with Chrome)
+ */
+new AitanaStack(app, 'Aitana', { stackName: 'Aitana' });
