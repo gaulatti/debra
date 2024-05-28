@@ -1,11 +1,18 @@
 import { Stack } from 'aws-cdk-lib';
-import { UserPool, UserPoolClient, UserPoolClientIdentityProvider, UserPoolIdentityProviderGoogle } from 'aws-cdk-lib/aws-cognito';
+import { UserPool, UserPoolClient, UserPoolClientIdentityProvider, UserPoolDomain, UserPoolIdentityProviderGoogle } from 'aws-cdk-lib/aws-cognito';
 
 const createCognitoPool = (stack: Stack) => {
   const userPool = new UserPool(stack, `${stack.stackName}UserPool`, {
     userPoolName: `${stack.stackName}UserPool`,
     selfSignUpEnabled: true,
     signInAliases: { email: false, username: false },
+  });
+
+  const userPoolDomain = new UserPoolDomain(stack, `${stack.stackName}Domain`, {
+    userPool,
+    cognitoDomain: {
+      domainPrefix: `${stack.stackName.toLowerCase()}`,
+    },
   });
 
   /**
@@ -30,6 +37,10 @@ const createCognitoPool = (stack: Stack) => {
     userPool,
     supportedIdentityProviders: [UserPoolClientIdentityProvider.GOOGLE],
     generateSecret: false,
+    oAuth: {
+      callbackUrls: [`https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/oauth2/idpresponse`],
+      logoutUrls: [`https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/logout`],
+    },
   });
 
   /**
