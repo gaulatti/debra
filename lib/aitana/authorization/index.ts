@@ -1,13 +1,34 @@
 import { Stack } from 'aws-cdk-lib';
-import { UserPool, UserPoolClient, UserPoolClientIdentityProvider, UserPoolDomain, UserPoolIdentityProviderGoogle } from 'aws-cdk-lib/aws-cognito';
+import {
+  CfnUserPoolIdentityProvider,
+  CfnUserPoolResourceServer,
+  UserPool,
+  UserPoolClient,
+  UserPoolClientIdentityProvider,
+  UserPoolDomain,
+} from 'aws-cdk-lib/aws-cognito';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 
-const createCognitoPool = (stack: Stack) => {
+/**
+ * Creates a Cognito Pool with user pool, user pool domain, Okta identity provider,
+ * user pool client, and user pool resource server.
+ *
+ * @param stack - The AWS CloudFormation stack.
+ * @param oktaMetadataSecret - The Okta metadata secret.
+ */
+const createCognitoAuth = (stack: Stack, oktaMetadataSecret: Secret) => {
+  /**
+   * Create User Pool
+   */
   const userPool = new UserPool(stack, `${stack.stackName}UserPool`, {
     userPoolName: `${stack.stackName}UserPool`,
     selfSignUpEnabled: true,
     signInAliases: { email: false, username: false },
   });
 
+  /**
+   * Create User Pool Domain
+   */
   const userPoolDomain = new UserPoolDomain(stack, `${stack.stackName}Domain`, {
     userPool,
     cognitoDomain: {
@@ -16,17 +37,19 @@ const createCognitoPool = (stack: Stack) => {
   });
 
   /**
-   * Create Google Identity Provider
+   * Create Okta Identity Provider
+   * following: https://repost.aws/knowledge-center/cognito-okta-saml-identity-provider
    */
-  const googleProvider = new UserPoolIdentityProviderGoogle(stack, `${stack.stackName}GoogleProvider`, {
-    clientId: 'your-google-client-id',
-    clientSecret: 'your-google-client-secret',
-    userPool,
-    scopes: ['profile', 'email', 'openid'],
+  const samlProvider = new CfnUserPoolIdentityProvider(stack, `${stack.stackName}OktaProvider`, {
+    providerName: 'Okta',
+    providerType: 'SAML',
+    userPoolId: userPool.userPoolId,
+    providerDetails: {
+      MetadataURL: oktaMetadataSecret.secretValue.unsafeUnwrap(),
+      IDPSignout: 'true',
+    },
     attributeMapping: {
-      email: { attributeName: 'email' },
-      givenName: { attributeName: 'given_name' },
-      familyName: { attributeName: 'family_name' },
+      email: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',
     },
   });
 
@@ -34,19 +57,39 @@ const createCognitoPool = (stack: Stack) => {
    * Create User Pool Client
    */
   const userPoolClient = new UserPoolClient(stack, `${stack.stackName}UserPoolClient`, {
+    userPoolClientName: `${stack.stackName}UserPoolClient`,
     userPool,
-    supportedIdentityProviders: [UserPoolClientIdentityProvider.GOOGLE],
+    supportedIdentityProviders: [UserPoolClientIdentityProvider.custom('Okta')],
     generateSecret: false,
     oAuth: {
-      callbackUrls: [`https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/oauth2/idpresponse`],
-      logoutUrls: [`https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/logout`],
+      callbackUrls: [
+        `https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/oauth2/idpresponse`,
+        'http://localhost:5173',
+        'https://nena.gaulatti.com',
+      ],
+      logoutUrls: [`https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/logout`, 'http://localhost:5173/logout', 'https://nena.gaulatti.com/logout'],
     },
   });
 
   /**
    * Add dependency to Google Provider
    */
-  userPoolClient.node.addDependency(googleProvider);
+  userPoolClient.node.addDependency(samlProvider);
+
+  /**
+   * Create User Pool Resource Server
+   */
+  new CfnUserPoolResourceServer(stack, `${stack.stackName}SamlAttributeMapping`, {
+    name: 'Okta',
+    identifier: 'saml',
+    userPoolId: userPool.userPoolId,
+    scopes: [
+      {
+        scopeName: 'email',
+        scopeDescription: 'email',
+      },
+    ],
+  });
 };
 
-export { createCognitoPool };
+export { createCognitoAuth };
