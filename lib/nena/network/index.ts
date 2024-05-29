@@ -46,6 +46,14 @@ const createDistribution = (stack: Stack, s3BucketSource: Bucket) => {
     viewerCertificate: ViewerCertificate.fromAcmCertificate(certificate, {
       aliases: ['nena.gaulatti.com'],
     }),
+    errorConfigurations: [
+      {
+        errorCode: 404,
+        responsePagePath: '/index.html',
+        responseCode: 200,
+        errorCachingMinTtl: 0,
+      },
+    ],
   });
 
   return distribution;
