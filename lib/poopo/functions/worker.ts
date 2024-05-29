@@ -3,7 +3,8 @@ import { LayerVersion, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 const createWorkerLambda = (stack: Stack) => {
-  const chromeLambdaLayer = LayerVersion.fromLayerVersionArn(stack, 'ChromeLambdaLayer', 'arn:aws:lambda:us-east-1:764866452798:layer:chrome-aws-lambda:45');
+  const chromeLambdaLayer = LayerVersion.fromLayerVersionArn(stack, 'chromium-lambda-layer', 'arn:aws:lambda:us-east-1:764866452798:layer:chrome-aws-lambda:45');
+  const lighthouseLambdaLayer = LayerVersion.fromLayerVersionArn(stack, 'lighthouse-lambda-layer', 'arn:aws:lambda:us-east-1:792025092931:layer:lighthouse:1');
 
   const workerLambdaSpec = {
     functionName: `${stack.stackName}Worker`,
@@ -11,7 +12,11 @@ const createWorkerLambda = (stack: Stack) => {
     handler: 'main',
     runtime: Runtime.NODEJS_20_X,
     timeout: Duration.minutes(5),
-    layers: [chromeLambdaLayer],
+    layers: [chromeLambdaLayer, lighthouseLambdaLayer],
+    memorySize: 8192,
+    bundling: {
+      externalModules: ['@sparticuz/chromium']
+    }
   };
 
   const workerLambda = new NodejsFunction(stack, `${workerLambdaSpec.functionName}Lambda`, workerLambdaSpec);
