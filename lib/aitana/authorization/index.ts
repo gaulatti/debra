@@ -63,11 +63,10 @@ const createCognitoAuth = (stack: Stack, oktaMetadataSecret: Secret) => {
     generateSecret: false,
     oAuth: {
       callbackUrls: [
-        `https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/oauth2/idpresponse`,
         'http://localhost:5173',
         'https://nena.gaulatti.com',
       ],
-      logoutUrls: [`https://${userPoolDomain.domainName}.auth.${stack.region}.amazoncognito.com/logout`, 'http://localhost:5173/logout', 'https://nena.gaulatti.com/logout'],
+      logoutUrls: ['http://localhost:5173/logout', 'https://nena.gaulatti.com/logout'],
     },
   });
 
