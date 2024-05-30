@@ -15,7 +15,7 @@ const createWorkerLambda = (stack: Stack) => {
     layers: [chromeLambdaLayer, lighthouseLambdaLayer],
     memorySize: 8192,
     bundling: {
-      externalModules: ['@sparticuz/chromium']
+      externalModules: ['@sparticuz/chromium', 'lighthouse']
     }
   };
 
