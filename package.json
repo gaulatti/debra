@@ -6,7 +6,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "deploy": "npm run build && cdk deploy",
+    "deploy": "npm run build && cdk deploy --require-approval never",
     "watch": "tsc -w",
     "test": "jest --config jest.config.ts",
     "cdk": "cdk"
