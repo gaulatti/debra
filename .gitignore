@@ -9,5 +9,5 @@ cdk.out
 dist
 .env
 coverage
-build
+/build
 .DS_Store
