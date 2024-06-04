@@ -1,6 +1,6 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { createFargateService } from './fargate';
+import { createFargateTask } from './fargate';
 import { createSecrets } from './secrets';
 import { createVpc } from './network';
 import { createCluster } from './compute';
@@ -25,9 +25,9 @@ class ZoeStack extends Stack {
     const { cluster } = createCluster(this, vpc);
 
     /**
-     * Create Fargate Task
+     * Create Fargate Service
      */
-    const { fargateService } = createFargateService(this, { urlSecret, apiKeySecret, targetSecret }, cluster);
+    const { fargateTaskDefinition } = createFargateTask(this, { urlSecret, apiKeySecret, targetSecret });
   }
 }
 

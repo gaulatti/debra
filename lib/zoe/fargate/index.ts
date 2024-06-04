@@ -1,12 +1,34 @@
 import { Stack } from 'aws-cdk-lib';
-import { Cluster, ContainerImage, CpuArchitecture, FargateService, FargateTaskDefinition, OperatingSystemFamily, Secret } from 'aws-cdk-lib/aws-ecs';
+import { AwsLogDriver, ContainerImage, CpuArchitecture, FargateTaskDefinition, OperatingSystemFamily, Secret } from 'aws-cdk-lib/aws-ecs';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Secret as SSMSecret } from 'aws-cdk-lib/aws-secretsmanager';
 
-const createFargateService = (stack: Stack, secrets: Record<string, SSMSecret>, cluster: Cluster) => {
+/**
+ * Creates a Fargate task definition with the specified stack and secrets.
+ * @param stack - The CloudFormation stack.
+ * @param secrets - The secrets used by the Fargate service.
+ * @returns The Fargate task definition.
+ */
+const createFargateTask = (stack: Stack, secrets: Record<string, SSMSecret>) => {
   /**
    * Represents the secrets used by the Fargate service.
    */
   const { urlSecret, apiKeySecret, targetSecret } = secrets;
+
+  /**
+   * Represents the CloudWatch log group.
+   */
+  const logGroup = new LogGroup(stack, `${stack.stackName}LighthouseLogGroup`, {
+    retention: RetentionDays.ONE_WEEK,
+  });
+
+  /**
+   * Represents the log driver used by the Fargate service.
+   */
+  const logDriver = new AwsLogDriver({
+    logGroup,
+    streamPrefix: 'Lighthouse',
+  });
 
   /**
    * Represents the Fargate task definition.
@@ -30,18 +52,10 @@ const createFargateService = (stack: Stack, secrets: Record<string, SSMSecret>, 
       API_KEY_SECRET: Secret.fromSecretsManager(apiKeySecret),
       TARGET_SECRET: Secret.fromSecretsManager(targetSecret),
     },
+    logging: logDriver,
   });
 
-  /**
-   * Represents the Fargate service.
-   */
-  const fargateService = new FargateService(stack, `${stack.stackName}LighthouseFargateService`, {
-    serviceName: `${stack.stackName}LighthouseFargateService`,
-    cluster,
-    taskDefinition: fargateTaskDefinition,
-  });
-
-  return { fargateService };
+  return { fargateTaskDefinition };
 };
 
-export { createFargateService };
+export { createFargateTask };
