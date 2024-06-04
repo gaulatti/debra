@@ -1,5 +1,5 @@
 import { Stack } from 'aws-cdk-lib';
-import { Vpc } from 'aws-cdk-lib/aws-ec2';
+import { SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
 
 /**
  * Creates a VPC (Virtual Private Cloud) for the given stack.
@@ -15,4 +15,13 @@ const createVpc = (stack: Stack) => {
   return { vpc };
 };
 
-export { createVpc };
+const createSecurityGroup = (stack: Stack, vpc: Vpc) => {
+  const securityGroup = new SecurityGroup(stack, `${stack.stackName}SecurityGroup`, {
+    vpc,
+    securityGroupName: `${stack.stackName}SecurityGroup`,
+  });
+
+  return { securityGroup };
+}
+
+export { createVpc, createSecurityGroup };

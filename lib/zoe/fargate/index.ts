@@ -6,14 +6,9 @@ import { Secret as SSMSecret } from 'aws-cdk-lib/aws-secretsmanager';
 /**
  * Creates a Fargate task definition with the specified stack and secrets.
  * @param stack - The CloudFormation stack.
- * @param secrets - The secrets used by the Fargate service.
  * @returns The Fargate task definition.
  */
-const createFargateTask = (stack: Stack, secrets: Record<string, SSMSecret>) => {
-  /**
-   * Represents the secrets used by the Fargate service.
-   */
-  const { urlSecret, apiKeySecret, targetSecret } = secrets;
+const createFargateTask = (stack: Stack) => {
 
   /**
    * Represents the CloudWatch log group.
@@ -37,8 +32,6 @@ const createFargateTask = (stack: Stack, secrets: Record<string, SSMSecret>) => 
     cpu: 4096,
     memoryLimitMiB: 8192,
     runtimePlatform: { cpuArchitecture: CpuArchitecture.X86_64, operatingSystemFamily: OperatingSystemFamily.LINUX },
-    executionRole: undefined,
-    taskRole: undefined,
   });
 
   /**
@@ -47,11 +40,6 @@ const createFargateTask = (stack: Stack, secrets: Record<string, SSMSecret>) => 
   fargateTaskDefinition.addContainer(`${stack.stackName}LighthouseFargateContainer`, {
     containerName: `${stack.stackName}LighthouseFargateContainer`,
     image: ContainerImage.fromAsset('./lib/zoe/assets'),
-    secrets: {
-      URL_SECRET: Secret.fromSecretsManager(urlSecret),
-      API_KEY_SECRET: Secret.fromSecretsManager(apiKeySecret),
-      TARGET_SECRET: Secret.fromSecretsManager(targetSecret),
-    },
     logging: logDriver,
   });
 

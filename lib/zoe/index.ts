@@ -2,8 +2,10 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { createFargateTask } from './fargate';
 import { createSecrets } from './secrets';
-import { createVpc } from './network';
+import { createSecurityGroup, createVpc } from './network';
 import { createCluster } from './compute';
+import { createTriggerLambda } from './functions/trigger';
+import { create } from 'domain';
 
 class ZoeStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -20,6 +22,11 @@ class ZoeStack extends Stack {
     const { vpc } = createVpc(this);
 
     /**
+     * Create Security Group
+     */
+    const { securityGroup } = createSecurityGroup(this, vpc);
+
+    /**
      * Create Cluster
      */
     const { cluster } = createCluster(this, vpc);
@@ -27,7 +34,12 @@ class ZoeStack extends Stack {
     /**
      * Create Fargate Service
      */
-    const { fargateTaskDefinition } = createFargateTask(this, { urlSecret, apiKeySecret, targetSecret });
+    const { fargateTaskDefinition } = createFargateTask(this);
+
+    /**
+     * Create Trigger Lambda
+     */
+    const triggerLambda = createTriggerLambda(this, { urlSecret, apiKeySecret, targetSecret }, fargateTaskDefinition, cluster, securityGroup);
   }
 }
 
