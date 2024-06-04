@@ -1,13 +1,13 @@
 import { Stack } from 'aws-cdk-lib';
-import { ContainerImage, CpuArchitecture, FargateTaskDefinition, OperatingSystemFamily, Secret } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, CpuArchitecture, FargateService, FargateTaskDefinition, OperatingSystemFamily, Secret } from 'aws-cdk-lib/aws-ecs';
 import { Secret as SSMSecret } from 'aws-cdk-lib/aws-secretsmanager';
 
-/**
- * Creates a Fargate task definition for the specified stack.
- * @param stack - The stack to create the Fargate task definition for.
- * @returns An object containing the created Fargate task definition.
- */
-const createFargateTask = (stack: Stack, { urlSecret, apiKeySecret, targetSecret }: Record<string, SSMSecret>) => {
+const createFargateService = (stack: Stack, secrets: Record<string, SSMSecret>, cluster: Cluster) => {
+  /**
+   * Represents the secrets used by the Fargate service.
+   */
+  const { urlSecret, apiKeySecret, targetSecret } = secrets;
+
   /**
    * Represents the Fargate task definition.
    */
@@ -23,6 +23,7 @@ const createFargateTask = (stack: Stack, { urlSecret, apiKeySecret, targetSecret
    * Adds a container to the Fargate task definition.
    */
   fargateTaskDefinition.addContainer(`${stack.stackName}LighthouseFargateContainer`, {
+    containerName: `${stack.stackName}LighthouseFargateContainer`,
     image: ContainerImage.fromAsset('./lib/zoe/assets'),
     secrets: {
       URL_SECRET: Secret.fromSecretsManager(urlSecret),
@@ -31,7 +32,16 @@ const createFargateTask = (stack: Stack, { urlSecret, apiKeySecret, targetSecret
     },
   });
 
-  return { fargateTaskDefinition };
+  /**
+   * Represents the Fargate service.
+   */
+  const fargateService = new FargateService(stack, `${stack.stackName}LighthouseFargateService`, {
+    serviceName: `${stack.stackName}LighthouseFargateService`,
+    cluster,
+    taskDefinition: fargateTaskDefinition,
+  });
+
+  return { fargateService };
 };
 
-export { createFargateTask };
+export { createFargateService };
