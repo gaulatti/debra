@@ -34,5 +34,5 @@ new AitanaStack(app, 'Aitana', { stackName: 'Aitana' });
 
 /**
  * Represent the Zoe stack (Lighthouse Beaconing on ECS/Fargate)
+ * new ZoeStack(app, 'Zoe', { stackName: 'Zoe' });
  */
-new ZoeStack(app, 'Zoe', { stackName: 'Zoe' });
