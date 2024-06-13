@@ -5,7 +5,6 @@ import { AristonStack } from '../lib/ariston';
 import { NenaStack } from '../lib/nena';
 import { PoopoStack } from '../lib/poopo';
 import { AitanaStack } from '../lib/aitana';
-import { ZoeStack } from '../lib/zoe';
 
 /**
  * Represents the AWS Cloud Development Kit (CDK) app.
@@ -31,8 +30,3 @@ new PoopoStack(app, 'Poopo', { stackName: 'Poopo' });
  * Represent the Aitana stack (Cognito Authentication with Chrome)
  */
 new AitanaStack(app, 'Aitana', { stackName: 'Aitana' });
-
-/**
- * Represent the Zoe stack (Lighthouse Beaconing on ECS/Fargate)
- * new ZoeStack(app, 'Zoe', { stackName: 'Zoe' });
- */
